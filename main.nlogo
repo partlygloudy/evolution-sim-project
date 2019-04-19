@@ -2,17 +2,17 @@
 ;             PARAMETERS AND SETUP              ;
 ; --------------------------------------------- ;
 
-; Global parameters - these are the variables we
-; change between experiments
+; Global parameters - most will probably be set from inputs
+; on the interface screen
 globals [
-  growback
 ]
 
-; Define breed for food patches with foods
-; (Only one type of agent so we don't need a breed)
+; Define breeds for food patches and people
 breed [food_patches food_patch]
+breed [people person]
 
-turtles-own [
+; Variables unique to the 'people' breed
+people-own [
   energy          ;; the amount of energy a turtle has
   vision          ;; the amount of distance a turtle can see
   social          ;; the social behavior of the turtle
@@ -20,7 +20,8 @@ turtles-own [
   speed
 ]
 
-patches-own [
+; Variables unique to the 'food_patches' breed
+food_patches-own [
  food
 ]
 
@@ -36,14 +37,11 @@ to setup
   ; Clear environment
   clear-all
 
-  ; Set values for global parameters
-  set growback 1                        ; Will be set by slider, patch growback
-
   ; Create initial food patches
-  ;create-food_patches  initial-patches [setup-patches]
+  create-food_patches initial-patches [spawn-patch-random]
 
   ; Create initial agents
-  create-turtles initial-population [turtle-setup]
+  create-people initial-population [spawn-person-random]
 
   ; Start counter
   reset-ticks
@@ -59,7 +57,7 @@ to go
   tick
 
   ; Run each component of simulation
-  ;simulate-food-generation
+  simulate-food-generation
   simulate-reproduction
   simulate-interactions
   simulate-movement
@@ -73,9 +71,9 @@ end
 ;              HELPER FUNCTIONS                 ;
 ; --------------------------------------------- ;
 
-; Randomly initialize an agent
+; Randomly initialize a person
 ; Use this for initial setup, not for reproduction
-to turtle-setup
+to spawn-person-random
 
   ; Set initial physical traits
   set vision random-float 1
@@ -91,7 +89,7 @@ to turtle-setup
   ; Set initial social trait
   set social random-float 1
 
-  ; Set appearance of agent
+  ; Set appearance
   set color red                    ; (Set this based on social trait (red = aggressive, green = cooperative))
   set shape "circle"
 
@@ -106,19 +104,46 @@ to turtle-setup
 
 end
 
+; Initialize a food patch in a random location
+; Use this for initial setup, not for food regeneration
+to spawn-patch-random
 
-; Randomly add food to a patch
-; TODO: MODIFY SO PATCHES MORE LIKELY TO GROW NEAR OTHER PATCHES
-to setup-patches
+  ; Set appearance
   set color green
   set shape "square"
-  set food 1
+
+  ; Place randomly
   move-to one-of patches with [not any? other turtles-here]
+
+end
+
+; Initialize a food patch at current location
+; Called from 'simulate-food-generation'
+to spawn-patch-here
+
+  ; Set appearance
+  set color green
+  set shape "square"
+
 end
 
 ; Simulate random food generation
 to simulate-food-generation
-  create-food_patches round (random-normal growback (growback / 2)) [setup-patches]
+
+  ; New food can appear in any patch with no food or agent
+  ask (patches with [not any? other turtles-here]) [
+
+    ; Check how many neighbors have food
+    let food-neighbors (count (neighbors with [any? food_patches-here]))
+
+    ; Decide whether we add food or not
+    if (random-float 1) < (growback * (food-neighbors + 0.01)) [
+
+      ; Sprout new food here
+      sprout-food_patches 1 [spawn-patch-here]
+    ]
+  ]
+
 end
 
 ; Simulate random agent reproduction
@@ -132,7 +157,7 @@ end
 ; Simulate agent movement
 to simulate-movement
 
-  ask turtles [
+  ask people [
 
     ; Use speed trait to determine if agent moves or not
     if (random-float 1) < speed [
@@ -171,11 +196,11 @@ end
 GRAPHICS-WINDOW
 309
 38
-921
-651
+923
+653
 -1
 -1
-4.0
+6.0
 1
 10
 1
@@ -186,9 +211,9 @@ GRAPHICS-WINDOW
 1
 1
 0
-150
+100
 0
-150
+100
 0
 0
 1
@@ -274,7 +299,18 @@ INPUTBOX
 293
 335
 initial-patches
-1.0
+50.0
+1
+0
+Number
+
+INPUTBOX
+18
+339
+293
+402
+growback
+1.0E-4
 1
 0
 Number

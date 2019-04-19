@@ -94,7 +94,7 @@ to spawn-person-random
   set shape "circle"
 
   ; Initialize energy to max
-  set energy 25                    ; (Maybe parametrize later?)
+  set energy initial-energy
 
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
@@ -155,6 +155,7 @@ to simulate-interactions
 end
 
 ; Simulate agent movement
+; TODO (maybe) - Make it so agents can't move to the same location
 to simulate-movement
 
   ask people [
@@ -182,17 +183,46 @@ to simulate-movement
       forward 1
 
     ]
-
   ]
 
 end
 
 ; Simulate agent food-collection
 to simulate-food-collection
+
+  ask people [
+
+    ; Check if there's food in current patch
+    if any? food_patches-here [
+
+      ; Increase energy
+      set energy (energy + food-energy)
+
+      ; Can't exceed initial energy amount
+      if energy > initial-energy [
+        set energy initial-energy
+      ]
+
+      ; Remove food
+      ask (one-of food_patches-here) [die]
+
+    ]
+  ]
 end
 
 ; Simulate agent energy loss and death
 to simulate-energy-loss
+
+  ask people [
+
+    ; Decrease energy by one
+    set energy energy - 1
+
+    ; Die if energy is zero
+    if (energy = 0) [die]
+
+  ]
+
 end
 
 
@@ -321,7 +351,29 @@ INPUTBOX
 293
 402
 growback
-1.0E-4
+0.001
+1
+0
+Number
+
+INPUTBOX
+18
+408
+293
+468
+initial-energy
+100.0
+1
+0
+Number
+
+INPUTBOX
+18
+474
+293
+534
+food-energy
+50.0
 1
 0
 Number

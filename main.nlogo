@@ -162,7 +162,18 @@ to simulate-movement
     ; Use speed trait to determine if agent moves or not
     if (random-float 1) < speed [
 
+      let visible (food_patches in-radius (vision * 10))
+
       ; If food in sight, head toward food
+      if (count visible > 0)[
+
+        ; Get closest food_patch
+        let closest (min-one-of visible [distance myself])
+
+        ; Head towards that food_patch
+        set heading (towards closest)
+
+      ]
 
       ; Else, head randomly
       set heading  (heading + (random-in-range (- turn-range) turn-range))
@@ -288,7 +299,7 @@ INPUTBOX
 293
 269
 initial-population
-1.0
+10.0
 1
 0
 Number

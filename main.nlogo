@@ -90,8 +90,16 @@ to spawn-person-random
   set social random-float 1
 
   ; Set appearance
-  set color red                    ; (Set this based on social trait (red = aggressive, green = cooperative))
-  set shape "circle"
+  if (speed > vision) and (speed > strength) [
+    set color 114
+  ]
+  if (vision > speed) and (vision > strength) [
+    set color 84
+  ]
+  if (strength > speed) and (strength > vision) [
+    set color 13
+  ]
+  set shape "circle"    ; (Set this based on social trait possibly?)
 
   ; Initialize energy to max
   set energy initial-energy
@@ -99,8 +107,48 @@ to spawn-person-random
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
 
-  ; Pen down (DEBUG)
-  pen-down
+end
+
+; Initialize a child based on attributes of parent
+; Use this for reproduction
+to spawn-person-child
+
+  ; Set initial physical traits (limit to 0.0 and 1.0)
+  set vision (vision + random-normal 0.0 mutation_rate)
+  set speed (speed + random-normal 0.0 mutation_rate)
+  set strength (strength + random-normal 0.0 mutation_rate)
+
+  ; Limit to range 0 to 1
+  set vision (min (list (max (list 0.0 vision)) 1.0))
+  set speed (min (list (max (list 0.0 speed)) 1.0))
+  set strength (min (list (max (list 0.0 strength)) 1.0))
+
+  ; Scale so they sum to 1
+  let total sum (list vision speed strength)
+  set vision (vision / total)
+  set speed (speed / total)
+  set strength (strength / total)
+
+  ; Set initial social trait
+  set social (social + random-normal 0.0 mutation_rate)
+
+  ; Set appearance
+  if (speed > vision) and (speed > strength) [
+    set color 114
+  ]
+  if (vision > speed) and (vision > strength) [
+    set color 84
+  ]
+  if (strength > speed) and (strength > vision) [
+    set color 13
+  ]
+  set shape "circle"    ; (Set this based on social trait possibly?)
+
+  ; Initialize energy to max
+  set energy initial-energy
+
+  ; Move to an unoccupied location
+  move-to one-of patches with [not any? other turtles-here]
 
 end
 
@@ -109,7 +157,7 @@ end
 to spawn-patch-random
 
   ; Set appearance
-  set color green
+  set color 45
   set shape "square"
 
   ; Place randomly
@@ -122,7 +170,7 @@ end
 to spawn-patch-here
 
   ; Set appearance
-  set color green
+  set color 45
   set shape "square"
 
 end
@@ -148,6 +196,18 @@ end
 
 ; Simulate random agent reproduction
 to simulate-reproduction
+
+  ask people [
+
+    ; Randomly decide whether we reproduce or not
+    if ((random-float 1) < reproduction_rate) [
+
+      ; Create child
+      hatch-people 1 [spawn-person-child]
+
+    ]
+  ]
+
 end
 
 ; Simulate agent interactions
@@ -225,7 +285,6 @@ to simulate-energy-loss
 
 end
 
-
 ; Return a random integer in range [low, high]
 to-report random-in-range [low high]
   report low + random (high - low + 1)
@@ -237,11 +296,11 @@ end
 GRAPHICS-WINDOW
 309
 38
-923
-653
+1001
+731
 -1
 -1
-6.0
+9.0
 1
 10
 1
@@ -252,9 +311,9 @@ GRAPHICS-WINDOW
 1
 1
 0
-100
+75
 0
-100
+75
 0
 0
 1
@@ -313,54 +372,54 @@ NIL
 1
 
 INPUTBOX
-17
-142
-293
-204
+161
+283
+294
+343
 turn-range
+45.0
+1
+0
+Number
+
+INPUTBOX
+17
+144
+150
+204
+initial-population
 30.0
 1
 0
 Number
 
 INPUTBOX
-17
-209
+161
+144
 293
-269
-initial-population
-10.0
-1
-0
-Number
-
-INPUTBOX
-18
-275
-293
-335
+204
 initial-patches
-50.0
+40.0
 1
 0
 Number
 
 INPUTBOX
 18
-339
-293
-402
+282
+150
+342
 growback
-0.001
+0.002
 1
 0
 Number
 
 INPUTBOX
-18
-408
-293
-468
+17
+212
+150
+272
 initial-energy
 100.0
 1
@@ -368,12 +427,34 @@ initial-energy
 Number
 
 INPUTBOX
-18
-474
-293
-534
+161
+214
+294
+274
 food-energy
-50.0
+100.0
+1
+0
+Number
+
+INPUTBOX
+17
+352
+151
+412
+reproduction_rate
+0.005
+1
+0
+Number
+
+INPUTBOX
+161
+353
+294
+413
+mutation_rate
+0.05
 1
 0
 Number

@@ -5,8 +5,6 @@
 ; Global parameters - these are the variables we
 ; change between experiments
 globals [
-  initial-population
-  initial-patches
   growback
 ]
 
@@ -39,8 +37,6 @@ to setup
   clear-all
 
   ; Set values for global parameters
-  set initial-population 100            ; (Maybe set from an interface element as well?)
-  set initial-patches 100               ; (Maybe set from an interface element as well?)
   set growback 1                        ; Will be set by slider, patch growback
 
   ; Create initial food patches
@@ -63,7 +59,7 @@ to go
   tick
 
   ; Run each component of simulation
-  simulate-food-generation
+  ;simulate-food-generation
   simulate-reproduction
   simulate-interactions
   simulate-movement
@@ -105,6 +101,9 @@ to turtle-setup
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
 
+  ; Pen down (DEBUG)
+  pen-down
+
 end
 
 
@@ -132,6 +131,24 @@ end
 
 ; Simulate agent movement
 to simulate-movement
+
+  ask turtles [
+
+    ; Use speed trait to determine if agent moves or not
+    if (random-float 1) < speed [
+
+      ; If food in sight, head toward food
+
+      ; Else, head randomly
+      set heading  (heading + (random-in-range (- turn-range) turn-range))
+
+      ; Move
+      forward 1
+
+    ]
+
+  ]
+
 end
 
 ; Simulate agent food-collection
@@ -143,7 +160,7 @@ to simulate-energy-loss
 end
 
 
-; Return a random integer in range [low, high)
+; Return a random integer in range [low, high]
 to-report random-in-range [low high]
   report low + random (high - low + 1)
 end
@@ -179,10 +196,10 @@ ticks
 30.0
 
 BUTTON
-24
-41
-132
-77
+17
+38
+152
+82
 Setup
 setup
 NIL
@@ -196,11 +213,11 @@ NIL
 1
 
 BUTTON
-146
-41
-254
-77
-Go
+158
+38
+292
+82
+Tick
 go
 NIL
 1
@@ -211,6 +228,56 @@ NIL
 NIL
 NIL
 1
+
+BUTTON
+17
+88
+293
+135
+Run Simulation
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+INPUTBOX
+17
+142
+293
+204
+turn-range
+30.0
+1
+0
+Number
+
+INPUTBOX
+17
+209
+293
+269
+initial-population
+1.0
+1
+0
+Number
+
+INPUTBOX
+18
+275
+293
+335
+initial-patches
+1.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?

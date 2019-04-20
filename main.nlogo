@@ -410,7 +410,7 @@ INPUTBOX
 150
 342
 growback
-0.002
+0.001
 1
 0
 Number
@@ -421,7 +421,7 @@ INPUTBOX
 150
 272
 initial-energy
-100.0
+500.0
 1
 0
 Number
@@ -432,7 +432,7 @@ INPUTBOX
 294
 274
 food-energy
-100.0
+40.0
 1
 0
 Number
@@ -443,7 +443,7 @@ INPUTBOX
 151
 412
 reproduction_rate
-0.005
+0.001
 1
 0
 Number

@@ -5,6 +5,9 @@
 ; Global parameters - most will probably be set from inputs
 ; on the interface screen
 globals [
+  num-fights
+  num-shares
+  num-ignores
 ]
 
 ; Define breeds for food patches and people
@@ -18,6 +21,7 @@ people-own [
   social          ;; the social behavior of the turtle
   strength
   speed
+  just-interacted
 ]
 
 ; Variables unique to the 'food_patches' breed
@@ -43,6 +47,11 @@ to setup
   ; Create initial agents
   create-people initial-population [spawn-person-random]
 
+  ; Set interaction counts to zero
+  set num-fights 0
+  set num-shares 0
+  set num-ignores 0
+
   ; Start counter
   reset-ticks
 end
@@ -57,6 +66,7 @@ to go
   tick
 
   ; Run each component of simulation
+  reduce-just-interacted
   simulate-food-generation
   simulate-reproduction
   simulate-interactions
@@ -104,6 +114,9 @@ to spawn-person-random
   ; Initialize energy to max
   set energy initial-energy
 
+  ; Initialize just-interacted to 0
+  set just-interacted 0
+
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
 
@@ -131,6 +144,7 @@ to spawn-person-child
 
   ; Set initial social trait
   set social (social + random-normal 0.0 mutation_rate)
+  set social (min (list (max (list 0.0 social)) 1.0))
 
   ; Set appearance
   if (speed > vision) and (speed > strength) [
@@ -146,6 +160,9 @@ to spawn-person-child
 
   ; Initialize energy to max
   set energy initial-energy
+
+  ; Initialize just-interacted to 0
+  set just-interacted 0
 
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
@@ -211,30 +228,88 @@ to simulate-reproduction
 
 end
 
+
+to reduce-just-interacted
+
+  ; Reduce just-interacted by 1 for all agents (minimum of 0)
+  ask people [
+    set just-interacted (max (list 0 (just-interacted - 1)))
+  ]
+
+end
+
 ; Simulate agent interactions
 to simulate-interactions
 
   ask people [
 
-    ; Get agentset of neighbors where 'just-interacted' = 0
+    if (just-interacted = 0) [
 
-    ; if count neighbors > 1 (or 0 if self not included in neigbors)
+      ; Get agentset of neighbors where 'just-interacted' = 0
+      let all-neighbors ((people in-radius 1.5) with [just-interacted = 0])
 
-      ; social-avg = mean (social + randon-normal 0.0 0.03) of neighbors
+      ; Check if there are other agents to ineract with
+      if (count all-neighbors > 1)[
 
-      ; if social-total < 0.34
+        ; Get average value of social trait among neighbors
+        let social-avg (mean [social + (random-normal 0.0 0.03)] of all-neighbors)
 
-        ; new-energy = mean [energy] of neighbors
-        ; ask neighbors [set energy new-energy]
+        ; Check for cooperative interaction
+        if (social-avg < 0.34) [
 
-      ; if social-total > 0.66
+          ; Find mean energy of all neighbors
+          let new-energy (mean [energy] of all-neighbors)
 
-        ; winner = max [strength + random-normal 0.0 0.05] of neighbors
-        ; new-energy = sum [energy] of neighbors
-        ; ask winner [set energy new-energy]
-        ; ask neighbors (who aren't winner) [die]
+          ; Each neighbor's energy = mean
+          ask all-neighbors [
+            set energy new-energy
+          ]
 
-      ; ask neighbors [set just-interacted 2]
+          ; Incrment share count
+          set num-shares (num-shares + 1)
+
+        ]
+
+        ; Check for aggressive interaction
+        if (social-avg > 0.66) [
+
+          ; Determine winner of fight based on stregnth traits
+          let winner max-one-of all-neighbors [strength + (random-normal 0.0 0.05)]
+
+          ; Determine energy winner will have after fight
+          let new-energy min (list initial-energy (sum [energy] of all-neighbors))
+
+          ; Winner gets all the energy
+          ask winner [set energy new-energy]
+
+          ; Other agents die
+          ask all-neighbors [
+
+            if (self != winner) [
+              die
+            ]
+
+          ]
+
+          ; Incrment fight count
+          set num-fights (num-fights + 1)
+
+        ]
+
+        ; Check for no-interaction (so we can increment count)
+        if (social-avg >= 0.34) and (social-avg <= 0.66) [
+          set num-ignores (num-ignores + 1)
+        ]
+
+        ; Set just-interacted to 2 for all agents involved
+        ask all-neighbors [
+          set just-interacted 5
+        ]
+
+      ]
+    ]
+
+
 
   ]
 
@@ -305,7 +380,7 @@ to simulate-energy-loss
     set energy energy - 1
 
     ; Die if energy is zero
-    if (energy = 0) [die]
+    if (energy <= 0) [die]
 
   ]
 
@@ -670,6 +745,39 @@ PENS
 "default" 1.0 0 -10141563 true "" "plot get-avg-speed"
 "pen-1" 1.0 0 -12345184 true "" "plot get-avg-vision"
 "pen-2" 1.0 0 -2674135 true "" "plot get-avg-strength"
+
+MONITOR
+1349
+90
+1486
+135
+# Fights
+num-fights
+0
+1
+11
+
+MONITOR
+1349
+143
+1486
+188
+# Shares
+num-shares
+0
+1
+11
+
+MONITOR
+1349
+198
+1487
+243
+# Ignores
+num-ignores
+0
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

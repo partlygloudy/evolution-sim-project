@@ -150,6 +150,7 @@ to spawn-person-child
   ; Move to an unoccupied location
   move-to one-of patches with [not any? other turtles-here]
 
+
 end
 
 ; Initialize a food patch in a random location
@@ -291,6 +292,52 @@ to-report random-in-range [low high]
 end
 
 
+; FUNCTIONS TO GET AVERAGE VALUE OF EACH
+; TRAIT ACROSS ALL LIVING AGENTS
+
+to-report get-avg-speed
+  report (mean [speed] of people)
+end
+
+to-report get-avg-vision
+  report (mean [vision] of people)
+end
+
+to-report get-avg-strength
+  report (mean [strength] of people)
+end
+
+to-report get-avg-social
+  report (mean [social] of people)
+end
+
+; FUNCTIONS TO GET STD. DEVIATION OF EACH
+; TRAIT ACROSS ALL LIVING AGENTS
+
+to-report get-std-dev-speed
+  report (standard-deviation [speed] of people)
+end
+
+to-report get-std-dev-vision
+  report (standard-deviation [vision] of people)
+end
+
+to-report get-std-dev-strength
+  report (standard-deviation [strength] of people)
+end
+
+to-report get-std-dev-social
+  report (standard-deviation [social] of people)
+end
+
+to-report get-num-people
+  report count people
+end
+
+to-report get-food-count
+  report count food_patches
+end
+
 
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -410,7 +457,7 @@ INPUTBOX
 150
 342
 growback
-0.001
+0.002
 1
 0
 Number
@@ -454,10 +501,150 @@ INPUTBOX
 294
 413
 mutation_rate
-0.05
+0.03
 1
 0
 Number
+
+MONITOR
+1023
+90
+1157
+135
+Avg. Speed
+get-avg-speed
+2
+1
+11
+
+TEXTBOX
+1022
+30
+1348
+88
+------------------------------------------------\n         SIMULATION STATISTICS\n------------------------------------------------
+16
+0.0
+1
+
+MONITOR
+1023
+144
+1158
+189
+Avg. Vision
+get-avg-vision
+2
+1
+11
+
+MONITOR
+1023
+199
+1159
+244
+Avg. Strength
+get-avg-strength
+2
+1
+11
+
+MONITOR
+1023
+254
+1159
+299
+Avg. Social
+get-avg-social
+2
+1
+11
+
+MONITOR
+1171
+90
+1307
+135
+Std. Dev. Speed
+get-std-dev-speed
+2
+1
+11
+
+MONITOR
+1171
+144
+1308
+189
+Std. Dev. Vision
+get-std-dev-vision
+2
+1
+11
+
+MONITOR
+1171
+199
+1309
+244
+Std. Dev. Strength
+get-std-dev-strength
+2
+1
+11
+
+MONITOR
+1172
+254
+1310
+299
+Std. Dev. Social
+get-std-dev-social
+2
+1
+11
+
+MONITOR
+1024
+331
+1161
+376
+# Of Agents
+get-num-people
+0
+1
+11
+
+MONITOR
+1172
+331
+1309
+376
+Food Count
+get-food-count
+0
+1
+11
+
+PLOT
+1024
+392
+1576
+730
+Average Value of Traits Among All Agents
+NIL
+NIL
+0.0
+10.0
+0.0
+0.75
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -10141563 true "" "plot get-avg-speed"
+"pen-1" 1.0 0 -12345184 true "" "plot get-avg-vision"
+"pen-2" 1.0 0 -2674135 true "" "plot get-avg-strength"
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -213,6 +213,31 @@ end
 
 ; Simulate agent interactions
 to simulate-interactions
+
+  ask people [
+
+    ; Get agentset of neighbors where 'just-interacted' = 0
+
+    ; if count neighbors > 1 (or 0 if self not included in neigbors)
+
+      ; social-avg = mean (social + randon-normal 0.0 0.03) of neighbors
+
+      ; if social-total < 0.34
+
+        ; new-energy = mean [energy] of neighbors
+        ; ask neighbors [set energy new-energy]
+
+      ; if social-total > 0.66
+
+        ; winner = max [strength + random-normal 0.0 0.05] of neighbors
+        ; new-energy = sum [energy] of neighbors
+        ; ask winner [set energy new-energy]
+        ; ask neighbors (who aren't winner) [die]
+
+      ; ask neighbors [set just-interacted 2]
+
+  ]
+
 end
 
 ; Simulate agent movement

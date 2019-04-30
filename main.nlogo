@@ -159,7 +159,7 @@ to spawn-person-child
   set shape "circle"    ; (Set this based on social trait possibly?)
 
   ; Initialize energy to max
-  set energy initial-energy
+  set energy (energy * .80)
 
   ; Initialize just-interacted to 0
   set just-interacted 0
@@ -219,10 +219,12 @@ to simulate-reproduction
 
     ; Randomly decide whether we reproduce or not
     if ((random-float 1) < reproduction_rate) [
+      if(energy > (initial-energy * .75)) [
 
       ; Create child
       hatch-people 1 [spawn-person-child]
-
+        set energy (energy * .20)
+      ]
     ]
   ]
 
@@ -437,8 +439,6 @@ end
 to-report get-food-count
   report count food_patches
 end
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 309
@@ -557,7 +557,7 @@ INPUTBOX
 150
 342
 growback
-0.002
+0.01
 1
 0
 Number
@@ -568,7 +568,7 @@ INPUTBOX
 150
 272
 initial-energy
-500.0
+1000.0
 1
 0
 Number
@@ -579,7 +579,7 @@ INPUTBOX
 294
 274
 food-energy
-40.0
+50.0
 1
 0
 Number
@@ -590,7 +590,7 @@ INPUTBOX
 151
 412
 reproduction_rate
-0.001
+0.01
 1
 0
 Number
@@ -739,12 +739,13 @@ NIL
 0.0
 0.75
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 0 -10141563 true "" "plot get-avg-speed"
-"pen-1" 1.0 0 -12345184 true "" "plot get-avg-vision"
-"pen-2" 1.0 0 -2674135 true "" "plot get-avg-strength"
+"Average Speed" 1.0 0 -10141563 true "" "plot get-avg-speed"
+"Average Vision" 1.0 0 -12345184 true "" "plot get-avg-vision"
+"Average Strength" 1.0 0 -2674135 true "" "plot get-avg-strength"
+"Average Social" 1.0 0 -6459832 true "" "plot get-avg-social"
 
 MONITOR
 1349
